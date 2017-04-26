@@ -1,4 +1,8 @@
-#include<ostream>
+#include<new>
+#include<cstddef>
+#include<cstdlib>
+#include<climits>
+#include<iostream>
 #include"String.h"
 using std::cout;
 using TinySTL::string;
@@ -30,5 +34,6 @@ int main() {
 	A a = A();
 	std::cout << is_void<int>::value << std::endl;
 	std::cout << is_void<void>::value << std::endl;
+	//cerr << "hello" << endl;
 	return 0;
 }

@@ -18,7 +18,7 @@ namespace TinySTL {
 		string& operator= (const string& str);
 		string& operator= (string&& str);
 		string operator+ (const string& str);
-
+		
 		size_t size() const { return finish - start; }
 		void reserve(size_t size);
 
