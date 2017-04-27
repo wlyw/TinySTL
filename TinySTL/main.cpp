@@ -34,11 +34,11 @@ int main() {
 	//std::cout << is_void<void>::value << std::endl;
 	//cerr << "hello" << endl;
 
-	int b[5] = { 0,1,2,3,4 };
+	/*int b[5] = { 0,1,2,3,4 };
 	unsigned int i;
 	vector<int, TinySTL::allocator<int> > vi(b, b + 5);
 	for (i = 0; i < vi.size(); ++i)
-		cout << vi[i] << ' ';
+		cout << vi[i] << ' ';*/
 
 	return 0;
 }

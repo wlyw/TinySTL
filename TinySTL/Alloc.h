@@ -98,13 +98,13 @@ namespace TinySTL {
 
 	//};
 
-	template<int inst>
+	template<int inst>				//定义内容相同的class，但是class类型不同，<0><1>...
 	class _malloc_alloc_template {
 	private:
 		//process out of memory(oom)
 		static void *oom_malloc(size_t);
 		static void *oom_realloc(void *, size_t);
-		static void(*_malloc_alloc_oom_handler)();
+		static void(*_malloc_alloc_oom_handler)();		//释放内存
 
 	public:
 		//暂时不清楚这里用static的原因
@@ -118,8 +118,67 @@ namespace TinySTL {
 			free(p);
 		}
 
+		static void *reallocate(void *p, size_t /* old_sz */, size_t new_sz) {
+			void *result = realloc(p, new_sz);
+			if (0 == result) result = oom_realloc(p, new_sz);
+			return result;
+		}
 
+		//因为没有使用::operator new配置内存，所以不能直接使用new-handler机制
+		//设计“内存不足处理”是使用者的责任，所以SGI STl中默认_malloc_alloc_oom_handler=0
+		//out of memory handler
+		static void (*set_malloc_handler(void(*f)()))(){
+			//函数类型
+			//using F = int(int*, int);		//函数类型
+			//int (*f(int))(int*, int);		//f2形参为int，返回一个指针，指针的类型为int(int*, int)，即函数指针
+
+			//using F = void(*)();
+			//F old;
+			void (*old)() = _malloc_alloc_oom_handler;
+			_malloc_alloc_oom_handler = f;
+			return (old);
+		}
 	};
+
+	template<int inst>
+	void (*_malloc_alloc_template<inst>::_malloc_alloc_oom_handler)() = 0;
+
+	template<int inst>
+	void *_malloc_alloc_template<inst>::oom_malloc(size_t n) {
+		void (*my_malloc_handler)();
+		void *result;
+
+		while (1) {
+			my_malloc_handler = _malloc_alloc_oom_handler;
+			if (0 == my_malloc_handler) {
+				cerr << "bad alloc" << endl;
+				exit(-1);
+			}
+			(*my_malloc_handler)();		//调用自定义的oom处理函数_malloc_alloc_oom_handler，企图释放内存。
+			result = malloc(n);
+			if (result) return (result);
+		}
+	}
+
+	template<int inst>
+	void *_malloc_alloc_template<inst>::oom_realloc(void *p, size_t n) {
+		void(*my_malloc_handler)();
+		void *result;
+
+		while (1) {
+			my_malloc_handler = _malloc_alloc_oom_handler;
+			if (0 == my_malloc_handler) {
+				cerr << "bad alloc" << endl;
+				exit(-1);
+			}
+			(*my_malloc_handler)();
+			result = realloc(p, n);
+			if (result) return (result);
+		}
+	}
+
+	//令inst=0，指定类模板类型
+	typedef _malloc_alloc_template<0> malloc_alloc;
 }
 
 #endif // ! TINYSTL_ALLOC_H_
